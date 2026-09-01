@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Exo 1 — le DOM à la main</title>
+<style>
+  /* Tout le style t'est donné : le taper ne t'apprendrait rien. */
+  body   { background:#302E2B; color:#E4E1DA; font-family:system-ui, sans-serif;
+           display:flex; justify-content:center; padding:40px 16px; }
+  main   { width:100%; max-width:420px; }
+  h1     { font-size:18px; color:#81B64C; margin:0 0 20px; }
+  .row   { display:flex; gap:8px; margin-bottom:16px; }
+  input  { flex:1; padding:10px; border:none; border-radius:4px;
+           background:#262421; color:#E4E1DA; font-size:15px; }
+  button { padding:10px 16px; border:none; border-radius:4px; cursor:pointer;
+           background:#81B64C; color:#fff; font-size:15px; font-weight:600; }
+  button:disabled { background:#3E3C39; color:#7A7772; cursor:not-allowed; }
+  ul     { list-style:none; padding:0; margin:0 0 16px; }
+  li     { background:#262421; padding:10px 12px; border-radius:4px;
+           margin-bottom:4px; font-family:ui-monospace, monospace; }
+  #counter { color:#9A9791; font-size:14px; margin:0 0 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Répertoire de coups</h1>
+
+  <div class="row">
+    <input id="move-input" placeholder="e4, Nf3, O-O..." autocomplete="off">
+    <button id="add-button">Ajouter</button>
+  </div>
+
+  <ul id="move-list"></ul>
+
+  <p id="counter">0 coup</p>
+
+  <button id="clear-button" disabled>Tout effacer</button>
+
+  <button id="cancel-button" disabled>Annuler</button>
+</main>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  LES DONNÉES — la source de vérité
+// ══════════════════════════════════════════════════════════════
+
+let moves = [];
+
+
+// ══════════════════════════════════════════════════════════════
+//  LES ÉLÉMENTS DE LA PAGE — déjà récupérés pour toi
+// ══════════════════════════════════════════════════════════════
+
+const input       = document.querySelector('#move-input');
+const addButton   = document.querySelector('#add-button');
+const list        = document.querySelector('#move-list');
+const counter     = document.querySelector('#counter');
+const clearButton = document.querySelector('#clear-button');
+const cancelButton = document.querySelector('#cancel-button');
+
+
+// ══════════════════════════════════════════════════════════════
+//  L'INVARIANT À MAINTENIR
+//
+//  Après CHAQUE appel de addMove() ou de clearMoves(), l'écran
+//  doit refléter exactement le contenu de `moves` :
+//
+//    1. `list`        contient un <li> par coup, dans l'ordre
+//    2. `counter`     affiche "N coup" (ou "N coups" si N > 1)
+//    3. `clearButton` est désactivé quand `moves` est vide
+//
+//  Personne ne le fera pour toi. C'est tout l'objet de l'exercice.
+// ══════════════════════════════════════════════════════════════
+
+// TODO 1 — Ajouter le coup `san` au répertoire.
+//   (san: string) => void
+//   Doit laisser l'écran conforme à l'invariant ci-dessus.
+function addMove(san) {
+
+  // add move
+  moves.push(san);
+
+  // update list
+  const newLi = document.createElement("li");
+  newLi.textContent = san;
+  list.appendChild(newLi);
+
+  // update move counter
+  const movesLength = moves.length;
+  
+  if (movesLength > 1) {
+    counter.textContent = `${movesLength} coups`;
+  }
+  else {
+    counter.textContent = `${movesLength} coup`;
+  }
+
+  // update Tout effacer button -- should be enabled as soon as there is one or more move
+  clearButton.disabled = false;
+  cancelButton.disabled = false;
+
+}
+
+
+// TODO 2 — Vider entièrement le répertoire.
+//   () => void
+//   Doit laisser l'écran conforme à l'invariant ci-dessus.
+function clearMoves() {
+  moves = [];
+  list.innerHTML = "";
+  counter.textContent = "0 coup";
+  clearButton.disabled = true;
+  cancelButton.disabled = true;
+}
+
+
+function cancelMove() {
+  //remove last move in list
+  moves.pop();
+  list.lastElementChild.remove();
+
+  // update move counter
+  const movesLength = moves.length;
+  
+  if (movesLength > 1) {
+    counter.textContent = `${movesLength} coups`;
+    clearButton.disabled = false;
+    cancelButton.disabled = false;
+  }
+  else if (movesLength === 1) {
+    counter.textContent = `${movesLength} coup`;
+    clearButton.disabled = false;
+    cancelButton.disabled = false;
+  }
+  else {
+    counter.textContent = `${movesLength} coup`;
+    clearButton.disabled = true;
+    cancelButton.disabled = true;
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════
+//  LE CÂBLAGE — déjà fait pour toi
+// ══════════════════════════════════════════════════════════════
+
+addButton.addEventListener('click', () => {
+  const san = input.value.trim();
+  if (san === '') return;
+  addMove(san);
+  input.value = '';
+  input.focus();
+});
+
+clearButton.addEventListener('click', clearMoves);
+
+cancelButton.addEventListener('click', cancelMove);
+</script>
+</body>
+</html>
